@@ -19,22 +19,33 @@ import java.util.List;
 public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     private List<Book> mBooks;
     private Context mContext;
+    private OnBookSelectedListener listener;
+
+    public interface OnBookSelectedListener{
+        void onBookSelected(Book book);
+    }
 
     // View lookup cache
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivCover;
         public TextView tvTitle;
         public TextView tvAuthor;
+        View view;
 
         public ViewHolder(View itemView) {
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
+            view = itemView;
 
             ivCover = (ImageView)itemView.findViewById(R.id.ivBookCover);
             tvTitle = (TextView)itemView.findViewById(R.id.tvTitle);
             tvAuthor = (TextView)itemView.findViewById(R.id.tvAuthor);
         }
+    }
+
+    public void setOnBookClickListener(OnBookSelectedListener listener){
+        this.listener = listener;
     }
 
     public BookAdapter(Context context, ArrayList<Book> aBooks) {
@@ -61,7 +72,7 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(BookAdapter.ViewHolder viewHolder, int position) {
         // Get the data model based on position
-        Book book = mBooks.get(position);
+        final Book book = mBooks.get(position);
 
         // Populate data into the template view using the data object
         viewHolder.tvTitle.setText(book.getTitle());
@@ -70,6 +81,14 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
                 .load(Uri.parse(book.getCoverUrl()))
                 .placeholder(R.drawable.ic_nocover)
                 .into(viewHolder.ivCover);
+
+        viewHolder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onBookSelected(book);
+            }
+        });
+
         // Return the completed view to render on screen
     }
 
